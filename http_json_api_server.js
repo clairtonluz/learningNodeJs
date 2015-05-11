@@ -13,15 +13,15 @@ http.createServer(function(req, res) {
 
   if (query.pathname === '/api/parsetime') {
     var d = new Date(query.query.iso);
-    res.end(JSON.stringify({ hour: d.getHours(), minute : d.getMinutes(), second : d.getSeconds()}))
+    return res.end(JSON.stringify({ hour: d.getHours(), minute : d.getMinutes(), second : d.getSeconds()}))
   }
 
   if (query.pathname === '/api/unixtime') {
     var d = new Date(query.query.iso);
-    res.end(JSON.stringify({unixtime : d.getTime()}))
+    return res.end(JSON.stringify({unixtime : d.getTime()}))
   }
 
-  res.end('');
+  res.end('not found');
 }).listen(port)
 
 console.log('Server running at port ' + port);
