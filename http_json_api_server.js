@@ -1,27 +1,34 @@
 var http = require('http')
-var map = require('through2-map')
 var url = require('url')
-var port = process.argv[2]
-
-http.createServer(function(req, res) {
-  if (req.method != 'GET')
-    return res.end('send me a GET\n')
-
-  var query = url.parse(req.url, true);
-
-  res.writeHead(200, { 'Content-Type': 'application/json' })
-
-  if (query.pathname === '/api/parsetime') {
-    var d = new Date(query.query.iso);
-    return res.end(JSON.stringify({ hour: d.getHours(), minute : d.getMinutes(), second : d.getSeconds()}))
+    
+function parsetime (time) {
+  return {
+    hour: time.getHours(),
+    minute: time.getMinutes(),
+    second: time.getSeconds()
   }
-
-  if (query.pathname === '/api/unixtime') {
-    var d = new Date(query.query.iso);
-    return res.end(JSON.stringify({unixtime : d.getTime()}))
+}
+    
+function unixtime (time) {
+  return { unixtime : time.getTime() }
+}
+    
+var server = http.createServer(function (req, res) {
+  var parsedUrl = url.parse(req.url, true)
+  var time = new Date(parsedUrl.query.iso)
+  var result
+    
+  if (/^\/api\/parsetime/.test(req.url))
+    result = parsetime(time)
+  else if (/^\/api\/unixtime/.test(req.url))
+    result = unixtime(time)
+    
+  if (result) {
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    res.end(JSON.stringify(result))
+  } else {
+    res.writeHead(404)
+    res.end()
   }
-
-  res.end('not found');
-}).listen(port)
-
-console.log('Server running at port ' + port);
+})
+server.listen(Number(process.argv[2]))
